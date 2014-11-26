@@ -16,7 +16,8 @@ defmodule Cuckoo.Mixfile do
   end
 
   defp deps do
-    [{:coverex, "~> 1.0.0", only: :test}
+    [{:coverex, "~> 1.0.0", only: :test},
+     {:murmur, "~> 0.2"}
     ]
   end
 end
