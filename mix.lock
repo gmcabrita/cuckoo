@@ -1,0 +1,6 @@
+%{"coverex": {:hex, :coverex, "1.0.0"},
+  "hackney": {:hex, :hackney, "0.13.1"},
+  "httpoison": {:hex, :httpoison, "0.4.2"},
+  "idna": {:hex, :idna, "1.0.1"},
+  "murmur": {:hex, :murmur, "0.2.0"},
+  "poison": {:hex, :poison, "1.1.1"}}
