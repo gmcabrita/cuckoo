@@ -1,0 +1,2 @@
+defmodule Cuckoo do
+end
