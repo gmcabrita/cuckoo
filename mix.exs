@@ -5,7 +5,9 @@ defmodule Cuckoo.Mixfile do
     [app: :cuckoo,
      version: "0.0.1",
      elixir: "~> 1.0",
-     deps: deps]
+     deps: deps,
+     aliases: [dialyze: "dialyze --unmatched-returns --error-handling --race-conditions --underspecs"]
+    ]
   end
 
   # Configuration for the OTP application
