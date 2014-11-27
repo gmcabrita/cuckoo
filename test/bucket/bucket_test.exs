@@ -14,7 +14,12 @@ defmodule Cuckoo.BucketTest do
   end
 
   test "check if a bucket contains an element after inserting", %{bucket: bucket} do
-    bucket = bucket |> Cuckoo.Bucket.set(0, 10)
-    assert 10 in bucket
+    bucket = Cuckoo.Bucket.set(bucket, 0, 10)
+    assert Cuckoo.Bucket.contains?(bucket, 10)
+  end
+
+  test "get element from the bucket after inserting", %{bucket: bucket} do
+    bucket = Cuckoo.Bucket.set(bucket, 0, 10)
+    assert Cuckoo.Bucket.get(bucket, 0) == 10
   end
 end
