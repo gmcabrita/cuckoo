@@ -150,7 +150,7 @@ defmodule Cuckoo do
 
   @spec hash(any, pos_integer) :: {pos_integer, pos_integer, pos_integer}
   defp hash(element, bits_per_item) do
-    h1 = Murmur.hash(:x64_128, element)
+    h1 = Murmur.hash(:x86_32, element)
     fingerprint = fingerprint(h1, bits_per_item)
     h2 = h1 ^^^ :erlang.phash2(fingerprint)
 
