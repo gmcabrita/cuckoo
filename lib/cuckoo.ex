@@ -55,7 +55,7 @@ defmodule Cuckoo do
     i2 = index(h2, size)
 
     i1_bucket = Array.get(buckets, i1)
-    case i1_bucket |> Bucket.has_room? do
+    case Bucket.has_room?(i1_bucket) do
       {:ok, index} ->
         {:ok, %{filter |
                 buckets: Array.set(
@@ -66,7 +66,7 @@ defmodule Cuckoo do
 
       {:err, :full} ->
         i2_bucket = Array.get(buckets, i2)
-        case i2_bucket |> Bucket.has_room? do
+        case Bucket.has_room?(i2_bucket) do
           {:ok, index} ->
             {:ok, %{filter |
                     buckets: Array.set(
@@ -140,7 +140,7 @@ defmodule Cuckoo do
 
   @spec index(pos_integer, pos_integer) :: non_neg_integer
   defp index(hash, num_buckets) do
-    hash |> rem(num_buckets)
+    rem(hash, num_buckets)
   end
 
   @spec fingerprint(pos_integer, pos_integer) :: pos_integer
