@@ -25,6 +25,14 @@ defmodule Cuckoo do
         }
   end
 
+  @doc """
+  Creates a new Cuckoo Filter using the given `max_num_keys`, `fingerprint_size` and
+  `fingerprints_per_bucket`.
+
+  The suggested values for the last two according to one of the publications should
+  be `16` and `4` respectively, as it allows the Cuckoo Filter to achieve a sweet spot
+  in space effiency and table occupancy.
+  """
   @spec new(pos_integer, pos_integer, pos_integer) :: Filter.t
   def new(max_num_keys, fingerprint_size, fingerprints_per_bucket \\ 4) do
     num_buckets = upper_power_2(max_num_keys / fingerprints_per_bucket)
@@ -42,6 +50,12 @@ defmodule Cuckoo do
         }
   end
 
+  @doc """
+  Tries to insert `element` into the Cuckoo Filter.
+
+  Returns `{:ok, filter}` if successful, otherwise returns `{:err, :full}` from which
+  you should consider the Filter to be full.
+  """
   @spec insert(Filter.t, any) :: {:ok, Filter.t} | {:err, :full}
   def insert(%Filter{
                      buckets: buckets,
@@ -85,6 +99,11 @@ defmodule Cuckoo do
     end
   end
 
+  @doc """
+  Checks if the Cuckoo Filter contains `element`.
+
+  Returns `true` if does, otherwise returns `false`.
+  """
   @spec contains?(Filter.t, any) :: boolean
   def contains?(%Filter{buckets: buckets, fingerprint_size: bits_per_item}, element) do
     {h1, fingerprint, h2} = hash(element, bits_per_item)
