@@ -5,6 +5,9 @@ defmodule Cuckoo.Bucket do
 
   @type t :: Array.t
 
+  @doc """
+  Creates a new bucket with the given size `n`.
+  """
   @spec new(pos_integer) :: t
   def new(n) do
     Array.new([n, :fixed])
@@ -30,7 +33,7 @@ defmodule Cuckoo.Bucket do
 
 
   @doc """
-  Checks if the bucket has any room left.
+  Checks if the `bucket` has any room left.
 
   Returns `{ :ok, index }` if it finds an empty entry in the bucket,
   otherwise returns `{ :err, :full }`.
@@ -46,7 +49,7 @@ defmodule Cuckoo.Bucket do
   end
 
   @doc """
-  Returns `true` if the bucket contains the element, otherwise returns `false`.
+  Returns `true` if the bucket contains the `element`, otherwise returns `false`.
 
   Alternatively you can use `element in bucket` instead of calling this function.
   """
