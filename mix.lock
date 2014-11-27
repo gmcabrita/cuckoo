@@ -1,4 +1,5 @@
-%{"coverex": {:hex, :coverex, "1.0.0"},
+%{"array": {:hex, :array, "1.0.1"},
+  "coverex": {:hex, :coverex, "1.0.0"},
   "excoveralls": {:git, "https://github.com/gmcabrita/excoveralls", "6cf384dddea965a2a192f0e5ecf45ecb82003872", [ref: "update-jsex"]},
   "exjsx": {:hex, :exjsx, "3.0.0"},
   "hackney": {:hex, :hackney, "0.13.1"},

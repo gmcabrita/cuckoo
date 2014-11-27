@@ -22,7 +22,8 @@ defmodule Cuckoo.Mixfile do
 
   defp deps do
     [{:excoveralls, git: "https://github.com/gmcabrita/excoveralls", ref: "update-jsex", only: :dev},
-     {:murmur, "~> 0.2"}
+     {:murmur, "~> 0.2"},
+     {:array, "~> 1.0"}
     ]
   end
 end
