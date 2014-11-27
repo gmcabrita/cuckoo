@@ -12,16 +12,16 @@ defmodule Cuckoo.Mixfile do
      description: @description,
      deps: deps,
      aliases: [dialyze: "dialyze --unmatched-returns --error-handling --race-conditions --underspecs"],
-     test_coverage: [tool: Coverex.Task, coveralls: true]
+     test_coverage: [tool: ExCoveralls]
     ]
   end
 
   def application do
-    [applications: [:httpoison]]
+    [applications: []]
   end
 
   defp deps do
-    [{:coverex, "~> 1.0.0", only: :test},
+    [{:excoveralls, git: "git@github.com:gmcabrita/excoveralls.git", ref: "update-jsex", only: :dev},
      {:murmur, "~> 0.2"}
     ]
   end
