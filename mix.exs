@@ -21,7 +21,7 @@ defmodule Cuckoo.Mixfile do
   end
 
   defp deps do
-    [{:excoveralls, git: "git@github.com:gmcabrita/excoveralls.git", ref: "update-jsex", only: :dev},
+    [{:excoveralls, git: "https://github.com/gmcabrita/excoveralls", ref: "update-jsex", only: :dev},
      {:murmur, "~> 0.2"}
     ]
   end
