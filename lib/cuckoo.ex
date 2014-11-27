@@ -140,12 +140,13 @@ defmodule Cuckoo do
 
     # find a place to put the old fingerprint
     fingerprint = old_fingerprint
-    index = index ^^^ :erlang.phash2(fingerprint)
+    h = index ^^^ :erlang.phash2(fingerprint)
+    index = index(h, Array.size(buckets))
     bucket = Array.get(buckets, index)
 
-    case Cuckoo.has_room?(bucket) do
+    case Bucket.has_room?(bucket) do
       {:ok, b_index} ->
-        bucket = Cuckoo.set(bucket, b_index, fingerprint)
+        bucket = Bucket.set(bucket, b_index, fingerprint)
         buckets = Array.set(buckets, index, bucket)
         {:ok, %{filter | buckets: buckets}}
       {:err, :full} ->
