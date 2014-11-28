@@ -158,13 +158,13 @@ defmodule Cuckoo do
 
   @spec fingerprint(pos_integer, pos_integer) :: pos_integer
   defp fingerprint(hash, bits_per_item) do
-  	hash &&& ((1 <<< bits_per_item) - 1)
+    hash &&& ((1 <<< bits_per_item) - 1)
   end
 
   # calculates the smallest power of 2 greater than or equal to n
   @spec upper_power_2(float) :: pos_integer
   defp upper_power_2(n) do
-  	:math.pow(2, Float.ceil(log2(n))) |> trunc
+    :math.pow(2, Float.ceil(log2(n))) |> trunc
   end
 
   @spec log2(float) :: float
@@ -181,7 +181,7 @@ defmodule Cuckoo do
 
   @spec fingerprint_and_index(any, pos_integer, pos_integer) :: {pos_integer, non_neg_integer}
   defp fingerprint_and_index(element, num_buckets, bits_per_item) do
-  	hash = hash1(element)
+    hash = hash1(element)
     fingerprint = fingerprint(hash, bits_per_item)
     index = index((hash >>> 32), num_buckets)
     {fingerprint, index}
@@ -189,7 +189,7 @@ defmodule Cuckoo do
 
   @spec alt_index(non_neg_integer, pos_integer, pos_integer) :: non_neg_integer
   defp alt_index(i1, fingerprint, num_buckets) do
-  	i1 ^^^ index(hash2(fingerprint), num_buckets)
+    i1 ^^^ index(hash2(fingerprint), num_buckets)
   end
 
 end
