@@ -179,6 +179,7 @@ defmodule Cuckoo do
   defp hash2(fingerprint), do: :erlang.phash2(fingerprint)
   #defp hash2(x), do: x * 0x5bd1e995
 
+  @spec fingerprint_and_index(any, pos_integer, pos_integer) :: {pos_integer, non_neg_integer}
   defp fingerprint_and_index(element, num_buckets, bits_per_item) do
   	hash = hash1(element)
     fingerprint = fingerprint(hash, bits_per_item)
@@ -186,6 +187,7 @@ defmodule Cuckoo do
     {fingerprint, index}
   end
 
+  @spec alt_index(non_neg_integer, pos_integer, pos_integer) :: non_neg_integer
   defp alt_index(i1, fingerprint, num_buckets) do
   	i1 ^^^ index(hash2(fingerprint), num_buckets)
   end
