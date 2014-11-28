@@ -24,6 +24,17 @@ defmodule Cuckoo.Bucket do
   end
 
   @doc """
+  Resets the entry `index` to the default value.
+
+  Returns the updated bucket.
+  """
+  @spec reset(t, non_neg_integer) :: t
+  def reset(bucket, index) do
+    Array.reset(bucket, index)
+  end
+
+
+  @doc """
   Returns the element at the specified `index`.
   """
   @spec get(t, non_neg_integer) :: pos_integer
@@ -56,6 +67,21 @@ defmodule Cuckoo.Bucket do
   @spec contains?(t, pos_integer) :: boolean
   def contains?(bucket, element) do
     element in bucket
+  end
+
+  @doc """
+  Tries to find the given `element` in the `bucket`.
+
+  Returns `{:ok, index}` if it finds it, otherwise returns `{:err, :inexistent}`.
+  """
+  @spec find(t, pos_integer) :: {:ok, non_neg_integer} | {:err, :inexistent}
+  def find(bucket, element) do
+    index = Enum.find_index(bucket, fn (x) -> x == element end)
+    unless index do
+      {:err, :inexistent}
+    else
+      {:ok, index}
+    end
   end
 
 end

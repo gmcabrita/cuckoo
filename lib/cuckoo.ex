@@ -115,6 +115,30 @@ defmodule Cuckoo do
 
   end
 
+  @spec delete(Filter.t, any) :: {:ok, Filter.t} | {:err, :inexistent}
+  def delete(%Filter{buckets: buckets, fingerprint_size: bits_per_item} = filter, element) do
+    num_buckets = Array.size(buckets)
+    {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
+
+    b1 = Array.get(buckets, i1)
+    case Bucket.find(b1, fingerprint) do
+      {:ok, index} ->
+        updated_bucket = Bucket.reset(b1, index)
+        {:ok, %{filter | buckets: Array.set(buckets, i1, updated_bucket)}}
+      {:err, :inexistent} ->
+          i2 = alt_index(i1, fingerprint, num_buckets)
+          b2 = Array.get(buckets, i2)
+          case Bucket.find(b2, fingerprint) do
+            {:ok, index} ->
+              updated_bucket = Bucket.reset(b2, index)
+              {:ok, %{filter | buckets: Array.set(buckets, i2, updated_bucket)}}
+            {:err, :inexistent} ->
+              {:err, :inexistent}
+          end
+
+    end
+  end
+
 
   # private helper functions
 
@@ -177,7 +201,6 @@ defmodule Cuckoo do
 
   @spec hash2(pos_integer) :: pos_integer
   defp hash2(fingerprint), do: :erlang.phash2(fingerprint)
-  #defp hash2(x), do: x * 0x5bd1e995
 
   @spec fingerprint_and_index(any, pos_integer, pos_integer) :: {pos_integer, non_neg_integer}
   defp fingerprint_and_index(element, num_buckets, bits_per_item) do
