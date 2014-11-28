@@ -1,6 +1,12 @@
 defmodule Cuckoo do
   @moduledoc """
-  This module implements a Cuckoo Filter.
+  This module implements a [Cuckoo Filter](https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf).
+
+  ## Implementation Details
+
+  The implementation follows the specification as per the paper above.
+
+  For hashing we use the x64_128 variant of Murmur3 and the Erlang phash2.
 
   ## Examples
 
@@ -43,6 +49,14 @@ defmodule Cuckoo do
         }
   end
 
+  defmodule Error do
+    defexception [reason: nil, action: "", element: nil]
+
+    def message(exception) do
+      "could not #{exception.action} #{exception.element}: #{exception.reason}"
+    end
+  end
+
   @doc """
   Creates a new Cuckoo Filter using the given `max_num_keys`, `fingerprint_size` and
   `fingerprints_per_bucket`.
@@ -52,7 +66,7 @@ defmodule Cuckoo do
   in space effiency and table occupancy.
   """
   @spec new(pos_integer, pos_integer, pos_integer) :: Filter.t
-  def new(max_num_keys, fingerprint_size, fingerprints_per_bucket \\ 4) do
+  def new(max_num_keys, fingerprint_size, fingerprints_per_bucket \\ 4) when max_num_keys > 2 do
     num_buckets = upper_power_2(max_num_keys / fingerprints_per_bucket)
     frac = max_num_keys / num_buckets / fingerprints_per_bucket
 
@@ -160,6 +174,32 @@ defmodule Cuckoo do
               {:err, :inexistent}
           end
 
+    end
+  end
+
+  @doc """
+  Returns a filter with the inserted element or raises `Cuckoo.Error` if an error occurs.
+  """
+  @spec insert!(Filter.t, any) :: Filter.t | no_return
+  def insert!(filter, element) do
+    case insert(filter, element) do
+      {:ok, filter} ->
+        filter
+      {:err, reason} ->
+        raise Cuckoo.Error, reason: reason, action: "insert element", element: element
+    end
+  end
+
+  @doc """
+  Returns a filter with the removed element or raises `Cuckoo.Error` if an error occurs.
+  """
+  @spec delete!(Filter.t, any) :: Filter.t | no_return
+  def delete!(filter, element) do
+    case delete(filter, element) do
+      {:ok, filter} ->
+        filter
+      {:err, reason} ->
+        raise Cuckoo.Error, reason: reason, action: "delete element", element: element
     end
   end
 
