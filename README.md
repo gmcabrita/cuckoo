@@ -27,3 +27,9 @@ iex> {:ok, cf} = Cuckoo.delete(cf, 5)
 iex> Cuckoo.contains?(cf, 5)
 false
 ```
+
+# Implementation Details
+
+The implementation follows the specification as per the paper above.
+
+For hashing we use the x64_128 variant of Murmur3 and the Erlang phash2.
