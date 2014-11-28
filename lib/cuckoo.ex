@@ -115,6 +115,12 @@ defmodule Cuckoo do
 
   end
 
+  @doc """
+  Attempts to delete `element` from the Cuckoo Filter if it contains it.
+
+  Returns `{:err, :inexistent}` if the element doesn't exist in the filter, otherwise
+  returns `{:ok, filter}`.
+  """
   @spec delete(Filter.t, any) :: {:ok, Filter.t} | {:err, :inexistent}
   def delete(%Filter{buckets: buckets, fingerprint_size: bits_per_item} = filter, element) do
     num_buckets = Array.size(buckets)
