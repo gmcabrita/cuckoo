@@ -1,5 +1,5 @@
 defmodule Cuckoo.BucketTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   setup do
     { :ok, bucket: Cuckoo.Bucket.new(4) }

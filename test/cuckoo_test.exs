@@ -1,5 +1,5 @@
 defmodule CuckooTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "create cuckoo filter, insert element and verify its existance" do
     {:ok, cf} = Cuckoo.new(100, 16) |> Cuckoo.insert("hello")
