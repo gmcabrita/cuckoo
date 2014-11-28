@@ -10,6 +10,7 @@ defmodule Cuckoo.Mixfile do
      version: "0.0.1",
      elixir: "~> 1.0",
      description: @description,
+     package: package,
      deps: deps,
      aliases: [dialyze: "dialyze --unmatched-returns --error-handling --race-conditions --underspecs"],
      test_coverage: [tool: ExCoveralls]
@@ -24,6 +25,15 @@ defmodule Cuckoo.Mixfile do
     [{:excoveralls, "~> 0.3", only: :dev},
      {:murmur, "~> 0.2"},
      {:array, "~> 1.0"}
+    ]
+  end
+
+  defp package do
+  	[
+        files: ["lib", "mix.exs", "README.md", "LICENSE"],
+        contributors: ["Gonçalo Cabrita"],
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/gmcabrita/cuckoo"}
     ]
   end
 end
