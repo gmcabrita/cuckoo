@@ -62,11 +62,9 @@ defmodule Cuckoo do
                      fingerprint_size: bits_per_item,
                      fingerprints_per_bucket: fingerprints_per_bucket
                  } = filter, element) do
-    {h1, fingerprint, h2} = hash(element, bits_per_item)
-
-    size = Array.size(buckets)
-    i1 = index(h1, size)
-    i2 = index(h2, size)
+    num_buckets = Array.size(buckets)
+    {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
+    i2 = alt_index(i1, fingerprint, num_buckets)
 
     i1_bucket = Array.get(buckets, i1)
     case Bucket.has_room?(i1_bucket) do
@@ -106,18 +104,15 @@ defmodule Cuckoo do
   """
   @spec contains?(Filter.t, any) :: boolean
   def contains?(%Filter{buckets: buckets, fingerprint_size: bits_per_item}, element) do
-    {h1, fingerprint, h2} = hash(element, bits_per_item)
+    num_buckets = Array.size(buckets)
+    {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
-    size = Array.size(buckets)
-    i1 = index(h1, size)
-    i2 = index(h2, size)
-
-    if fingerprint in Array.get(buckets, i1)
-    || fingerprint in Array.get(buckets, i2) do
-      true
-    else
-      false
+    case fingerprint in Array.get(buckets, i1) do
+      true -> true
+      false -> i2 = alt_index(i1, fingerprint, num_buckets)
+               fingerprint in Array.get(buckets, i2)
     end
+
   end
 
 
@@ -125,6 +120,7 @@ defmodule Cuckoo do
 
   @spec kickout(Filter.t, non_neg_integer, pos_integer, pos_integer, pos_integer) :: {:ok, Filter.t} | {:err, :full}
   defp kickout(filter, index, fingerprint, fingerprints_per_bucket, current_kick \\ @max_kicks)
+  defp kickout(_, _, _, _, 0), do: {:err, :full}
   defp kickout(%Filter{buckets: buckets} = filter, index, fingerprint, fingerprints_per_bucket, current_kick) do
     bucket = Array.get(buckets, index)
 
@@ -140,8 +136,8 @@ defmodule Cuckoo do
 
     # find a place to put the old fingerprint
     fingerprint = old_fingerprint
-    h = index ^^^ :erlang.phash2(fingerprint)
-    index = index(h, Array.size(buckets))
+    num_buckets = Array.size(buckets)
+    index = alt_index(index, fingerprint, num_buckets)
     bucket = Array.get(buckets, index)
 
     case Bucket.has_room?(bucket) do
@@ -154,9 +150,6 @@ defmodule Cuckoo do
     end
 
   end
-  defp kickout(_, _, _, _, 0) do
-  	{:err, :full}
-  end
 
   @spec index(pos_integer, pos_integer) :: non_neg_integer
   defp index(hash, num_buckets) do
@@ -168,15 +161,6 @@ defmodule Cuckoo do
   	hash &&& ((1 <<< bits_per_item) - 1)
   end
 
-  @spec hash(any, pos_integer) :: {pos_integer, pos_integer, pos_integer}
-  defp hash(element, bits_per_item) do
-    h1 = Murmur.hash(:x86_32, element)
-    fingerprint = fingerprint(h1, bits_per_item)
-    h2 = h1 ^^^ :erlang.phash2(fingerprint)
-
-    {h1, fingerprint, h2}
-  end
-
   # calculates the smallest power of 2 greater than or equal to n
   @spec upper_power_2(float) :: pos_integer
   defp upper_power_2(n) do
@@ -186,6 +170,24 @@ defmodule Cuckoo do
   @spec log2(float) :: float
   defp log2(n) do
     :math.log(n) / :math.log(2)
+  end
+
+  @spec hash1(any) :: pos_integer
+  defp hash1(element), do: Murmur.hash(:x64_128, element)
+
+  @spec hash2(pos_integer) :: pos_integer
+  defp hash2(fingerprint), do: :erlang.phash2(fingerprint)
+  #defp hash2(x), do: x * 0x5bd1e995
+
+  defp fingerprint_and_index(element, num_buckets, bits_per_item) do
+  	hash = hash1(element)
+    fingerprint = fingerprint(hash, bits_per_item)
+    index = index((hash >>> 32), num_buckets)
+    {fingerprint, index}
+  end
+
+  defp alt_index(i1, fingerprint, num_buckets) do
+  	i1 ^^^ index(hash2(fingerprint), num_buckets)
   end
 
 end
