@@ -2,3 +2,28 @@ Cuckoo [![Build Status](https://img.shields.io/travis/gmcabrita/cuckoo.svg?style
 ======
 
 Cuckoo is a pure Elixir implementation of a [Cuckoo Filter](https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf).
+
+# Usage
+
+Add Cuckoo as a dependency in your mix.exs file.
+
+```elixir
+def deps do
+  [{:cuckoo, "~> 0.0.1"}]
+end
+```
+
+# Examples
+
+```iex
+iex> cf = Cuckoo.new(1000, 16, 4)
+%Cuckoo.Filter{...}
+iex> {:ok, cf} = Cuckoo.insert(cf, 5)
+%Cuckoo.Filter{...}
+iex> Cuckoo.contains?(cf, 5)
+true
+iex> {:ok, cf} = Cuckoo.delete(cf, 5)
+%Cuckoo.Filter{...}
+iex> Cuckoo.contains?(cf, 5)
+false
+```
