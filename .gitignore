@@ -3,3 +3,4 @@
 /cover
 erl_crash.dump
 *.ez
+/docs/
