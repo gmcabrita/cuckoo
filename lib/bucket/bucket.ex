@@ -47,13 +47,13 @@ defmodule Cuckoo.Bucket do
   Checks if the `bucket` has any room left.
 
   Returns `{ :ok, index }` if it finds an empty entry in the bucket,
-  otherwise returns `{ :err, :full }`.
+  otherwise returns `{ :error, :full }`.
   """
-  @spec has_room?(t) :: { :ok, pos_integer } | { :err, :full }
+  @spec has_room?(t) :: { :ok, pos_integer } | { :error, :full }
   def has_room?(bucket) do
     index = Enum.find_index(bucket, fn (x) -> x == nil end)
     unless index do
-      { :err, :full }
+      { :error, :full }
     else
       { :ok, index }
     end
@@ -72,13 +72,13 @@ defmodule Cuckoo.Bucket do
   @doc """
   Tries to find the given `element` in the `bucket`.
 
-  Returns `{:ok, index}` if it finds it, otherwise returns `{:err, :inexistent}`.
+  Returns `{:ok, index}` if it finds it, otherwise returns `{:error, :inexistent}`.
   """
-  @spec find(t, pos_integer) :: {:ok, non_neg_integer} | {:err, :inexistent}
+  @spec find(t, pos_integer) :: {:ok, non_neg_integer} | {:error, :inexistent}
   def find(bucket, element) do
     index = Enum.find_index(bucket, fn (x) -> x == element end)
     unless index do
-      {:err, :inexistent}
+      {:error, :inexistent}
     else
       {:ok, index}
     end

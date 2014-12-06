@@ -85,10 +85,10 @@ defmodule Cuckoo do
   @doc """
   Tries to insert `element` into the Cuckoo Filter.
 
-  Returns `{:ok, filter}` if successful, otherwise returns `{:err, :full}` from which
+  Returns `{:ok, filter}` if successful, otherwise returns `{:error, :full}` from which
   you should consider the Filter to be full.
   """
-  @spec insert(Filter.t, any) :: {:ok, Filter.t} | {:err, :full}
+  @spec insert(Filter.t, any) :: {:ok, Filter.t} | {:error, :full}
   def insert(%Filter{
                      buckets: buckets,
                      fingerprint_size: bits_per_item,
@@ -108,7 +108,7 @@ defmodule Cuckoo do
                   Bucket.set(i1_bucket, index, fingerprint)
                 )}}
 
-      {:err, :full} ->
+      {:error, :full} ->
         i2_bucket = Array.get(buckets, i2)
         case Bucket.has_room?(i2_bucket) do
           {:ok, index} ->
@@ -119,7 +119,7 @@ defmodule Cuckoo do
                       Bucket.set(i2_bucket, index, fingerprint)
                     )}}
 
-          {:err, :full} ->
+          {:error, :full} ->
             if :random.uniform(2) == 1 do
               kickout(filter, i1, fingerprint, fingerprints_per_bucket)
             else
@@ -150,10 +150,10 @@ defmodule Cuckoo do
   @doc """
   Attempts to delete `element` from the Cuckoo Filter if it contains it.
 
-  Returns `{:err, :inexistent}` if the element doesn't exist in the filter, otherwise
+  Returns `{:error, :inexistent}` if the element doesn't exist in the filter, otherwise
   returns `{:ok, filter}`.
   """
-  @spec delete(Filter.t, any) :: {:ok, Filter.t} | {:err, :inexistent}
+  @spec delete(Filter.t, any) :: {:ok, Filter.t} | {:error, :inexistent}
   def delete(%Filter{buckets: buckets, fingerprint_size: bits_per_item} = filter, element) do
     num_buckets = Array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
@@ -163,15 +163,15 @@ defmodule Cuckoo do
       {:ok, index} ->
         updated_bucket = Bucket.reset(b1, index)
         {:ok, %{filter | buckets: Array.set(buckets, i1, updated_bucket)}}
-      {:err, :inexistent} ->
+      {:error, :inexistent} ->
           i2 = alt_index(i1, fingerprint, num_buckets)
           b2 = Array.get(buckets, i2)
           case Bucket.find(b2, fingerprint) do
             {:ok, index} ->
               updated_bucket = Bucket.reset(b2, index)
               {:ok, %{filter | buckets: Array.set(buckets, i2, updated_bucket)}}
-            {:err, :inexistent} ->
-              {:err, :inexistent}
+            {:error, :inexistent} ->
+              {:error, :inexistent}
           end
 
     end
@@ -185,7 +185,7 @@ defmodule Cuckoo do
     case insert(filter, element) do
       {:ok, filter} ->
         filter
-      {:err, reason} ->
+      {:error, reason} ->
         raise Cuckoo.Error, reason: reason, action: "insert element", element: element
     end
   end
@@ -198,7 +198,7 @@ defmodule Cuckoo do
     case delete(filter, element) do
       {:ok, filter} ->
         filter
-      {:err, reason} ->
+      {:error, reason} ->
         raise Cuckoo.Error, reason: reason, action: "delete element", element: element
     end
   end
@@ -206,9 +206,9 @@ defmodule Cuckoo do
 
   # private helper functions
 
-  @spec kickout(Filter.t, non_neg_integer, pos_integer, pos_integer, pos_integer) :: {:ok, Filter.t} | {:err, :full}
+  @spec kickout(Filter.t, non_neg_integer, pos_integer, pos_integer, pos_integer) :: {:ok, Filter.t} | {:error, :full}
   defp kickout(filter, index, fingerprint, fingerprints_per_bucket, current_kick \\ @max_kicks)
-  defp kickout(_, _, _, _, 0), do: {:err, :full}
+  defp kickout(_, _, _, _, 0), do: {:error, :full}
   defp kickout(%Filter{buckets: buckets} = filter, index, fingerprint, fingerprints_per_bucket, current_kick) do
     bucket = Array.get(buckets, index)
 
@@ -233,7 +233,7 @@ defmodule Cuckoo do
         bucket = Bucket.set(bucket, b_index, fingerprint)
         buckets = Array.set(buckets, index, bucket)
         {:ok, %{filter | buckets: buckets}}
-      {:err, :full} ->
+      {:error, :full} ->
         kickout(%{filter | buckets: buckets}, index, fingerprint, fingerprints_per_bucket, current_kick - 1)
     end
 
