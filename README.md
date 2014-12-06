@@ -9,7 +9,7 @@ Add Cuckoo as a dependency in your mix.exs file.
 
 ```elixir
 def deps do
-  [{:cuckoo, "~> 0.1.0"}]
+  [{:cuckoo, "~> 0.2.0"}]
 end
 ```
 
