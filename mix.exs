@@ -24,7 +24,6 @@ defmodule Cuckoo.Mixfile do
   defp deps do
     [{:excoveralls, "~> 0.3", only: :dev},
      {:murmur, "~> 0.2"},
-     {:array, "~> 1.0"},
      {:earmark, "~> 0.1", only: :dev},
      {:ex_doc, "~> 0.6", only: :dev}
     ]

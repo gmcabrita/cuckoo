@@ -42,7 +42,7 @@ defmodule Cuckoo do
 
     @type t ::
     %Filter{
-            buckets: Array.t,
+            buckets: :array.array(),
             fingerprint_size: pos_integer,
             fingerprints_per_bucket: pos_integer,
             max_num_keys: pos_integer
@@ -71,11 +71,11 @@ defmodule Cuckoo do
     frac = max_num_keys / num_buckets / fingerprints_per_bucket
 
     %Filter{
-            buckets: Array.new(
-              [if(frac > 0.96, do: num_buckets <<< 1, else: num_buckets),
-               :fixed,
-               {:default, Bucket.new(fingerprints_per_bucket)}]
-            ),
+            buckets:
+              :array.new([if(frac > 0.96, do: num_buckets <<< 1, else: num_buckets),
+                          :fixed,
+                          {:default, Bucket.new(fingerprints_per_bucket)}
+              ]),
             fingerprint_size: fingerprint_size,
             fingerprints_per_bucket: fingerprints_per_bucket,
             max_num_keys: max_num_keys
@@ -94,30 +94,22 @@ defmodule Cuckoo do
                      fingerprint_size: bits_per_item,
                      fingerprints_per_bucket: fingerprints_per_bucket
                  } = filter, element) do
-    num_buckets = Array.size(buckets)
+    num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
     i2 = alt_index(i1, fingerprint, num_buckets)
 
-    i1_bucket = Array.get(buckets, i1)
+    i1_bucket = :array.get(i1, buckets)
     case Bucket.has_room?(i1_bucket) do
       {:ok, index} ->
         {:ok, %{filter |
-                buckets: Array.set(
-                  buckets,
-                  i1,
-                  Bucket.set(i1_bucket, index, fingerprint)
-                )}}
+                buckets: :array.set(i1, Bucket.set(i1_bucket, index, fingerprint), buckets)}}
 
       {:error, :full} ->
-        i2_bucket = Array.get(buckets, i2)
+        i2_bucket = :array.get(i2, buckets)
         case Bucket.has_room?(i2_bucket) do
           {:ok, index} ->
             {:ok, %{filter |
-                    buckets: Array.set(
-                      buckets,
-                      i2,
-                      Bucket.set(i2_bucket, index, fingerprint)
-                    )}}
+                    buckets: :array.set(i2, Bucket.set(i2_bucket, index, fingerprint), buckets)}}
 
           {:error, :full} ->
             if :random.uniform(2) == 1 do
@@ -136,13 +128,13 @@ defmodule Cuckoo do
   """
   @spec contains?(Filter.t, any) :: boolean
   def contains?(%Filter{buckets: buckets, fingerprint_size: bits_per_item}, element) do
-    num_buckets = Array.size(buckets)
+    num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
-    case fingerprint in Array.get(buckets, i1) do
+    case fingerprint in :array.get(i1, buckets) do
       true -> true
       false -> i2 = alt_index(i1, fingerprint, num_buckets)
-               fingerprint in Array.get(buckets, i2)
+               fingerprint in :array.get(i2, buckets)
     end
 
   end
@@ -155,21 +147,21 @@ defmodule Cuckoo do
   """
   @spec delete(Filter.t, any) :: {:ok, Filter.t} | {:error, :inexistent}
   def delete(%Filter{buckets: buckets, fingerprint_size: bits_per_item} = filter, element) do
-    num_buckets = Array.size(buckets)
+    num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
-    b1 = Array.get(buckets, i1)
+    b1 = :array.get(i1, buckets)
     case Bucket.find(b1, fingerprint) do
       {:ok, index} ->
         updated_bucket = Bucket.reset(b1, index)
-        {:ok, %{filter | buckets: Array.set(buckets, i1, updated_bucket)}}
+        {:ok, %{filter | buckets: :array.set(i1, updated_bucket, buckets)}}
       {:error, :inexistent} ->
           i2 = alt_index(i1, fingerprint, num_buckets)
-          b2 = Array.get(buckets, i2)
+          b2 = :array.get(i2, buckets)
           case Bucket.find(b2, fingerprint) do
             {:ok, index} ->
               updated_bucket = Bucket.reset(b2, index)
-              {:ok, %{filter | buckets: Array.set(buckets, i2, updated_bucket)}}
+              {:ok, %{filter | buckets: :array.set(i2, updated_bucket, buckets)}}
             {:error, :inexistent} ->
               {:error, :inexistent}
           end
@@ -210,7 +202,7 @@ defmodule Cuckoo do
   defp kickout(filter, index, fingerprint, fingerprints_per_bucket, current_kick \\ @max_kicks)
   defp kickout(_, _, _, _, 0), do: {:error, :full}
   defp kickout(%Filter{buckets: buckets} = filter, index, fingerprint, fingerprints_per_bucket, current_kick) do
-    bucket = Array.get(buckets, index)
+    bucket = :array.get(index, buckets)
 
     # randomly select an entry from the bucket
     rand = :random.uniform(fingerprints_per_bucket) - 1
@@ -220,18 +212,18 @@ defmodule Cuckoo do
 
     # replace it
     bucket = Bucket.set(bucket, rand, fingerprint)
-    buckets = Array.set(buckets, index, bucket)
+    buckets = :array.set(index, bucket, buckets)
 
     # find a place to put the old fingerprint
     fingerprint = old_fingerprint
-    num_buckets = Array.size(buckets)
+    num_buckets = :array.size(buckets)
     index = alt_index(index, fingerprint, num_buckets)
-    bucket = Array.get(buckets, index)
+    bucket = :array.get(index, buckets)
 
     case Bucket.has_room?(bucket) do
       {:ok, b_index} ->
         bucket = Bucket.set(bucket, b_index, fingerprint)
-        buckets = Array.set(buckets, index, bucket)
+        buckets = :array.set(index, bucket, buckets)
         {:ok, %{filter | buckets: buckets}}
       {:error, :full} ->
         kickout(%{filter | buckets: buckets}, index, fingerprint, fingerprints_per_bucket, current_kick - 1)
