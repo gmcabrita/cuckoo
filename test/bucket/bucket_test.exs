@@ -6,7 +6,7 @@ defmodule Cuckoo.BucketTest do
   end
 
   test "create new bucket", %{bucket: bucket} do
-    assert bucket == Array.new(4)
+    assert bucket == :array.new([{:default, nil}, 4, :fixed])
   end
 
   test "check if a bucket has room", %{bucket: bucket} do

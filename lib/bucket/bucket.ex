@@ -3,14 +3,14 @@ defmodule Cuckoo.Bucket do
   This module implements a Bucket.
   """
 
-  @type t :: Array.t
+  @type t :: :array.array()
 
   @doc """
   Creates a new bucket with the given size `n`.
   """
   @spec new(pos_integer) :: t
   def new(n) do
-    Array.new([n, :fixed])
+    :array.new([{:default, nil}, n, :fixed])
   end
 
   @doc """
@@ -20,7 +20,7 @@ defmodule Cuckoo.Bucket do
   """
   @spec set(t, non_neg_integer, pos_integer) :: t
   def set(bucket, index, element) do
-    Array.set(bucket, index, element)
+    :array.set(index, element, bucket)
   end
 
   @doc """
@@ -30,7 +30,7 @@ defmodule Cuckoo.Bucket do
   """
   @spec reset(t, non_neg_integer) :: t
   def reset(bucket, index) do
-    Array.reset(bucket, index)
+    :array.reset(index, bucket)
   end
 
 
@@ -39,7 +39,7 @@ defmodule Cuckoo.Bucket do
   """
   @spec get(t, non_neg_integer) :: pos_integer
   def get(bucket, index) do
-    Array.get(bucket, index)
+    :array.get(index, bucket)
   end
 
 
@@ -51,7 +51,8 @@ defmodule Cuckoo.Bucket do
   """
   @spec has_room?(t) :: { :ok, pos_integer } | { :error, :full }
   def has_room?(bucket) do
-    index = Enum.find_index(bucket, fn (x) -> x == nil end)
+    index = array_find(bucket, fn (x) -> x == nil end)
+
     unless index do
       { :error, :full }
     else
@@ -61,12 +62,13 @@ defmodule Cuckoo.Bucket do
 
   @doc """
   Returns `true` if the bucket contains the `element`, otherwise returns `false`.
-
-  Alternatively you can use `element in bucket` instead of calling this function.
   """
   @spec contains?(t, pos_integer) :: boolean
   def contains?(bucket, element) do
-    element in bucket
+    case find(bucket, element) do
+      {:ok, _} -> true
+      {:error, :inexistent} -> false
+    end
   end
 
   @doc """
@@ -76,11 +78,27 @@ defmodule Cuckoo.Bucket do
   """
   @spec find(t, pos_integer) :: {:ok, non_neg_integer} | {:error, :inexistent}
   def find(bucket, element) do
-    index = Enum.find_index(bucket, fn (x) -> x == element end)
+    index = array_find(bucket, fn (x) -> x == element end)
+
     unless index do
       {:error, :inexistent}
     else
       {:ok, index}
+    end
+  end
+
+  defp array_find(array, fun) do
+    size = :array.size(array)
+    _array_find(array, size, size, fun)
+  end
+
+  defp _array_find(_, _, 0, _), do: nil
+  defp _array_find(array, size, left, fun) do
+    index = size-left
+    if fun.(:array.get(index, array)) do
+      index
+    else
+      _array_find(array, size, left - 1, fun)
     end
   end
 

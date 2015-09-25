@@ -131,10 +131,11 @@ defmodule Cuckoo do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
-    case fingerprint in :array.get(i1, buckets) do
+
+    case Bucket.contains?(:array.get(i1, buckets), fingerprint) do
       true -> true
       false -> i2 = alt_index(i1, fingerprint, num_buckets)
-               fingerprint in :array.get(i2, buckets)
+               Bucket.contains?(:array.get(i2, buckets), fingerprint)
     end
 
   end
