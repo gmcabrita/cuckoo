@@ -1,6 +1,8 @@
 language: elixir
 otp_release:
         - 18.0
-env: MIX_ENV=test
-after_success:
-        - "mix compile && mix coveralls.travis"
+sudo: false # to use faster container based build environment
+script:
+  - mix test
+after_script:
+  - mix coveralls.travis
