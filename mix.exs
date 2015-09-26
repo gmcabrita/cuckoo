@@ -25,7 +25,8 @@ defmodule Cuckoo.Mixfile do
     [{:excoveralls, "~> 0.3", only: :dev},
      {:murmur, "~> 0.2"},
      {:earmark, "~> 0.1", only: :dev},
-     {:ex_doc, "~> 0.6", only: :dev}
+     {:ex_doc, "~> 0.10", only: :dev},
+     {:inch_ex, only: :docs}
     ]
   end
 
