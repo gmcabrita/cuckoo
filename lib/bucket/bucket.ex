@@ -87,11 +87,13 @@ defmodule Cuckoo.Bucket do
     end
   end
 
+  @spec array_find(t, (any -> boolean)) :: { nil | non_neg_integer }
   defp array_find(array, fun) do
     size = :array.size(array)
     _array_find(array, size, size, fun)
   end
 
+  @spec _array_find(t, non_neg_integer, non_neg_integer, (any -> boolean)) :: { nil | non_neg_integer}
   defp _array_find(_, _, 0, _), do: nil
   defp _array_find(array, size, left, fun) do
     index = size-left
