@@ -14,6 +14,26 @@ defmodule CuckooTest do
     assert !Cuckoo.contains?(cf, "hello")
   end
 
+  test "sucessful insert!/2" do
+    assert Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.contains?("hello")
+  end
+
+  test "unsucessful insert!/2" do
+    assert_raise Cuckoo.Error, fn ->
+      Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.insert!(",") |> Cuckoo.insert!("world") |> Cuckoo.insert!("!") |> Cuckoo.insert!(".") |> Cuckoo.insert!("/") |> Cuckoo.insert!("foo") |> Cuckoo.insert!("bar")
+    end
+  end
+
+  test "successful delete!/2" do
+    assert !(Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello") |> Cuckoo.contains?("hello"))
+  end
+
+  test "unsucessful delete!/2" do
+    assert_raise Cuckoo.Error, fn ->
+      Cuckoo.new(3, 16) |> Cuckoo.delete!("hello")
+    end
+  end
+
   test "occupancy, false positives and removal" do
     total_inserts = 100000
     cf = Cuckoo.new(total_inserts, 16, 4)
