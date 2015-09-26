@@ -53,10 +53,10 @@ defmodule Cuckoo.Bucket do
   def has_room?(bucket) do
     index = array_find(bucket, fn (x) -> x == nil end)
 
-    unless index do
-      { :error, :full }
+    if index do
+      { :ok, index}
     else
-      { :ok, index }
+      { :error, :full }
     end
   end
 
@@ -80,10 +80,10 @@ defmodule Cuckoo.Bucket do
   def find(bucket, element) do
     index = array_find(bucket, fn (x) -> x == element end)
 
-    unless index do
-      {:error, :inexistent}
+    if index do
+      { :ok, index}
     else
-      {:ok, index}
+      { :error, :inexistent }
     end
   end
 
