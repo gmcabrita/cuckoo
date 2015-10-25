@@ -254,7 +254,7 @@ defmodule Cuckoo do
   end
 
   @spec hash1(any) :: pos_integer
-  defp hash1(element), do: Murmur.hash(:x64_128, element)
+  defp hash1(element), do: Murmur.hash_x64_128(element)
 
   @spec hash2(pos_integer) :: pos_integer
   defp hash2(fingerprint), do: :erlang.phash2(fingerprint)
