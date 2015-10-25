@@ -54,9 +54,9 @@ defmodule Cuckoo.Bucket do
     index = array_find(bucket, fn (x) -> x == nil end)
 
     if index do
-      { :ok, index}
+      {:ok, index}
     else
-      { :error, :full }
+      {:error, :full}
     end
   end
 
@@ -81,9 +81,9 @@ defmodule Cuckoo.Bucket do
     index = array_find(bucket, fn (x) -> x == element end)
 
     if index do
-      { :ok, index}
+      {:ok, index}
     else
-      { :error, :inexistent }
+      {:error, :inexistent}
     end
   end
 
@@ -96,7 +96,7 @@ defmodule Cuckoo.Bucket do
   @spec _array_find(t, non_neg_integer, non_neg_integer, (any -> boolean)) :: nil | non_neg_integer
   defp _array_find(_, _, 0, _), do: nil
   defp _array_find(array, size, left, fun) do
-    index = size-left
+    index = size - left
     if fun.(:array.get(index, array)) do
       index
     else
