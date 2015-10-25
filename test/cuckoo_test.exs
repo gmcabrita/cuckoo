@@ -21,7 +21,7 @@ defmodule CuckooTest do
   end
 
   test "unsucessful insert!/2" do
-    assert_raise Cuckoo.Error, fn ->
+    assert_raise Cuckoo.Error, "could not insert element .: full", fn ->
       Cuckoo.new(3, 16)
       |> Cuckoo.insert!("hello")
       |> Cuckoo.insert!(",")
@@ -39,7 +39,7 @@ defmodule CuckooTest do
   end
 
   test "unsucessful delete!/2" do
-    assert_raise Cuckoo.Error, fn ->
+    assert_raise Cuckoo.Error, "could not delete element hello: inexistent", fn ->
       Cuckoo.new(3, 16)
       |> Cuckoo.delete!("hello")
     end
