@@ -1,6 +1,11 @@
 defmodule CuckooTest do
   use ExUnit.Case, async: true
 
+  test "error message" do
+    error = %Cuckoo.Error{reason: :reason, action: "test", element: :test_elem}
+    assert Cuckoo.Error.message(error) == "could not test test_elem: reason"
+  end
+
   test "create cuckoo filter, insert element and verify its existance" do
     {:ok, cf} = Cuckoo.new(100, 16) |> Cuckoo.insert("hello")
     assert Cuckoo.contains?(cf, "hello")
