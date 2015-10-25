@@ -20,7 +20,7 @@ defmodule CuckooTest do
   end
 
   test "sucessful insert!/2" do
-    assert Cuckoo.new(3, 16)
+    assert Cuckoo.new(4, 16)
     |> Cuckoo.insert!("hello")
     |> Cuckoo.contains?("hello")
   end
