@@ -16,7 +16,7 @@ Add Cuckoo as a dependency in your mix.exs file.
 
 ```elixir
 def deps do
-  [{:cuckoo, "~> 0.3.0"}]
+  [{:cuckoo, "~> 1.0"}]
 end
 ```
 
@@ -25,12 +25,16 @@ end
 ```iex
 iex> cf = Cuckoo.new(1000, 16, 4)
 %Cuckoo.Filter{...}
+
 iex> {:ok, cf} = Cuckoo.insert(cf, 5)
 %Cuckoo.Filter{...}
+
 iex> Cuckoo.contains?(cf, 5)
 true
+
 iex> {:ok, cf} = Cuckoo.delete(cf, 5)
 %Cuckoo.Filter{...}
+
 iex> Cuckoo.contains?(cf, 5)
 false
 ```
