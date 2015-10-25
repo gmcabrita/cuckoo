@@ -34,19 +34,19 @@ defmodule Cuckoo do
 
   defmodule Filter do
     defstruct [
-            :buckets,
-            :fingerprint_size,
-            :fingerprints_per_bucket,
-            :max_num_keys
-        ]
+      :buckets,
+      :fingerprint_size,
+      :fingerprints_per_bucket,
+      :max_num_keys
+    ]
 
     @type t ::
     %Filter{
-            buckets: :array.array(),
-            fingerprint_size: pos_integer,
-            fingerprints_per_bucket: pos_integer,
-            max_num_keys: pos_integer
-        }
+      buckets: :array.array(),
+      fingerprint_size: pos_integer,
+      fingerprints_per_bucket: pos_integer,
+      max_num_keys: pos_integer
+    }
   end
 
   defmodule Error do
@@ -71,15 +71,20 @@ defmodule Cuckoo do
     frac = max_num_keys / num_buckets / fingerprints_per_bucket
 
     %Filter{
-            buckets:
-              :array.new([if(frac > 0.96, do: num_buckets <<< 1, else: num_buckets),
-                          :fixed,
-                          {:default, Bucket.new(fingerprints_per_bucket)}
-              ]),
-            fingerprint_size: fingerprint_size,
-            fingerprints_per_bucket: fingerprints_per_bucket,
-            max_num_keys: max_num_keys
-        }
+      buckets:
+        :array.new([
+          if frac > 0.96 do
+            num_buckets <<< 1
+          else
+            num_buckets
+          end,
+          :fixed,
+          {:default, Bucket.new(fingerprints_per_bucket)}
+        ]),
+      fingerprint_size: fingerprint_size,
+      fingerprints_per_bucket: fingerprints_per_bucket,
+      max_num_keys: max_num_keys
+    }
   end
 
   @doc """
@@ -90,10 +95,10 @@ defmodule Cuckoo do
   """
   @spec insert(Filter.t, any) :: {:ok, Filter.t} | {:error, :full}
   def insert(%Filter{
-                     buckets: buckets,
-                     fingerprint_size: bits_per_item,
-                     fingerprints_per_bucket: fingerprints_per_bucket
-                 } = filter, element) do
+              buckets: buckets,
+              fingerprint_size: bits_per_item,
+              fingerprints_per_bucket: fingerprints_per_bucket
+  } = filter, element) do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
     i2 = alt_index(i1, fingerprint, num_buckets)
@@ -131,11 +136,11 @@ defmodule Cuckoo do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
-
-    case Bucket.contains?(:array.get(i1, buckets), fingerprint) do
-      true -> true
-      false -> i2 = alt_index(i1, fingerprint, num_buckets)
-               Bucket.contains?(:array.get(i2, buckets), fingerprint)
+    if Bucket.contains?(:array.get(i1, buckets), fingerprint) do
+      true
+    else
+      i2 = alt_index(i1, fingerprint, num_buckets)
+      Bucket.contains?(:array.get(i2, buckets), fingerprint)
     end
 
   end
@@ -156,17 +161,19 @@ defmodule Cuckoo do
       {:ok, index} ->
         updated_bucket = Bucket.reset(b1, index)
         {:ok, %{filter | buckets: :array.set(i1, updated_bucket, buckets)}}
-      {:error, :inexistent} ->
-          i2 = alt_index(i1, fingerprint, num_buckets)
-          b2 = :array.get(i2, buckets)
-          case Bucket.find(b2, fingerprint) do
-            {:ok, index} ->
-              updated_bucket = Bucket.reset(b2, index)
-              {:ok, %{filter | buckets: :array.set(i2, updated_bucket, buckets)}}
-            {:error, :inexistent} ->
-              {:error, :inexistent}
-          end
 
+      {:error, :inexistent} ->
+        i2 = alt_index(i1, fingerprint, num_buckets)
+        b2 = :array.get(i2, buckets)
+
+        case Bucket.find(b2, fingerprint) do
+          {:ok, index} ->
+            updated_bucket = Bucket.reset(b2, index)
+            {:ok, %{filter | buckets: :array.set(i2, updated_bucket, buckets)}}
+
+          {:error, :inexistent} ->
+            {:error, :inexistent}
+        end
     end
   end
 
@@ -178,6 +185,7 @@ defmodule Cuckoo do
     case insert(filter, element) do
       {:ok, filter} ->
         filter
+
       {:error, reason} ->
         raise Cuckoo.Error, reason: reason, action: "insert element", element: element
     end
@@ -191,6 +199,7 @@ defmodule Cuckoo do
     case delete(filter, element) do
       {:ok, filter} ->
         filter
+
       {:error, reason} ->
         raise Cuckoo.Error, reason: reason, action: "delete element", element: element
     end
@@ -226,6 +235,7 @@ defmodule Cuckoo do
         bucket = Bucket.set(bucket, b_index, fingerprint)
         buckets = :array.set(index, bucket, buckets)
         {:ok, %{filter | buckets: buckets}}
+
       {:error, :full} ->
         kickout(%{filter | buckets: buckets}, index, fingerprint, fingerprints_per_bucket, current_kick - 1)
     end
@@ -264,6 +274,7 @@ defmodule Cuckoo do
     hash = hash1(element)
     fingerprint = fingerprint(hash, bits_per_item)
     index = index((hash >>> 32), num_buckets)
+
     {fingerprint, index}
   end
 
