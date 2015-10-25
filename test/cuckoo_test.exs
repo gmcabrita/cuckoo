@@ -11,26 +11,37 @@ defmodule CuckooTest do
     assert Cuckoo.contains?(cf, "hello")
 
     {:ok, cf} = Cuckoo.delete(cf, "hello")
-    assert !Cuckoo.contains?(cf, "hello")
+    refute Cuckoo.contains?(cf, "hello")
   end
 
   test "sucessful insert!/2" do
-    assert Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.contains?("hello")
+    assert Cuckoo.new(3, 16)
+    |> Cuckoo.insert!("hello")
+    |> Cuckoo.contains?("hello")
   end
 
   test "unsucessful insert!/2" do
     assert_raise Cuckoo.Error, fn ->
-      Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.insert!(",") |> Cuckoo.insert!("world") |> Cuckoo.insert!("!") |> Cuckoo.insert!(".") |> Cuckoo.insert!("/") |> Cuckoo.insert!("foo") |> Cuckoo.insert!("bar")
+      Cuckoo.new(3, 16)
+      |> Cuckoo.insert!("hello")
+      |> Cuckoo.insert!(",")
+      |> Cuckoo.insert!("world")
+      |> Cuckoo.insert!("!")
+      |> Cuckoo.insert!(".")
+      |> Cuckoo.insert!("/")
+      |> Cuckoo.insert!("foo")
+      |> Cuckoo.insert!("bar")
     end
   end
 
   test "successful delete!/2" do
-    assert !(Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello") |> Cuckoo.contains?("hello"))
+    refute Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello") |> Cuckoo.contains?("hello")
   end
 
   test "unsucessful delete!/2" do
     assert_raise Cuckoo.Error, fn ->
-      Cuckoo.new(3, 16) |> Cuckoo.delete!("hello")
+      Cuckoo.new(3, 16)
+      |> Cuckoo.delete!("hello")
     end
   end
 
