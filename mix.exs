@@ -33,7 +33,7 @@ defmodule Cuckoo.Mixfile do
      {:ex_doc, "~> 0.10", only: :docs},
      {:inch_ex, only: :docs},
      {:dialyze, "~> 0.2.0", only: [:dev, :test]},
-     {:murmur, "~> 0.2"}
+     {:murmur, "~> 1.0"}
     ]
   end
 
