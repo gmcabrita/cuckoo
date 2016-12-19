@@ -117,7 +117,7 @@ defmodule Cuckoo do
                     buckets: :array.set(i2, Bucket.set(i2_bucket, index, fingerprint), buckets)}}
 
           {:error, :full} ->
-            if :random.uniform(2) == 1 do
+            if :rand.uniform(2) == 1 do
               kickout(filter, i1, fingerprint, fingerprints_per_bucket)
             else
               kickout(filter, i2, fingerprint, fingerprints_per_bucket)
@@ -215,7 +215,7 @@ defmodule Cuckoo do
     bucket = :array.get(index, buckets)
 
     # randomly select an entry from the bucket
-    rand = :random.uniform(fingerprints_per_bucket) - 1
+    rand = :rand.uniform(fingerprints_per_bucket) - 1
 
     # withdraw its fingerprint
     old_fingerprint = Bucket.get(bucket, rand)
