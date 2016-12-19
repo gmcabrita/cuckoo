@@ -4,45 +4,58 @@ defmodule Cuckoo.Mixfile do
   @description """
   Cuckoo is a pure Elixir implementation of Cuckoo Filters.
   """
+  @github "https://github.com/gmcabrita/cuckoo"
 
   def project do
-    [app: :cuckoo,
-     version: "1.0.0",
-     elixir: "~> 1.0",
-     description: @description,
-     package: package,
-     deps: deps,
-     aliases: [
-        dialyze: "dialyze \
-                    --unmatched-returns \
-                    --error-handling \
-                    --race-conditions \
-                    --underspecs"
+    [
+      app: :cuckoo,
+      name: "Cuckoo",
+      source_url: @github,
+      homepage_url: nil,
+      version: "1.0.1-dev",
+      elixir: "~> 1.0",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      description: @description,
+      package: package(),
+      deps: deps(),
+      dialyzer: [
+        flags: ["-Wunmatched_returns", "-Werror_handling", "-Wrace_conditions", "-Wunderspecs"]
       ],
-     test_coverage: [tool: ExCoveralls]
+      test_coverage: [tool: ExCoveralls],
+      docs: docs()
     ]
   end
 
   def application do
-    [applications: []]
+    []
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      logo: nil,
+      extras: ["README.md"]
+    ]
   end
 
   defp deps do
-    [{:excoveralls, "~> 0.3", only: :docs},
-     {:earmark, "~> 0.1", only: :docs},
-     {:ex_doc, "~> 0.10", only: :docs},
-     {:inch_ex, only: :docs},
-     {:dialyze, "~> 0.2.0", only: [:dev, :test]},
-     {:murmur, "~> 1.0"}
+    [
+      {:murmur, "~> 1.0"},
+      {:excoveralls, "~> 0.5", only: :docs, runtime: false},
+      {:ex_doc, "~> 0.14", only: :docs, runtime: false},
+      {:inch_ex, ">= 0.0.0", only: :docs, runtime: false},
+      {:dialyxir, "~> 0.4", only: [:dev, :test], runtime: false},
+      {:credo, "~> 0.5", only: [:dev, :test], runtime: false}
     ]
   end
 
   defp package do
-  	[
-        files: ["lib", "mix.exs", "README.md", "LICENSE"],
-        maintainers: ["Gonçalo Cabrita"],
-        licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/gmcabrita/cuckoo"}
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE"],
+      maintainers: ["Gonçalo Cabrita"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => @github}
     ]
   end
 end
