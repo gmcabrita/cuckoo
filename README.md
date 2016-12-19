@@ -24,16 +24,16 @@ end
 
 ```iex
 iex> cf = Cuckoo.new(1000, 16, 4)
-%Cuckoo.Filter{...}
+%Cuckoo{...}
 
 iex> {:ok, cf} = Cuckoo.insert(cf, 5)
-%Cuckoo.Filter{...}
+%Cuckoo{...}
 
 iex> Cuckoo.contains?(cf, 5)
 true
 
 iex> {:ok, cf} = Cuckoo.delete(cf, 5)
-%Cuckoo.Filter{...}
+%Cuckoo{...}
 
 iex> Cuckoo.contains?(cf, 5)
 false

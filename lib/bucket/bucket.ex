@@ -49,7 +49,7 @@ defmodule Cuckoo.Bucket do
   Returns `{ :ok, index }` if it finds an empty entry in the bucket,
   otherwise returns `{ :error, :full }`.
   """
-  @spec has_room?(t) :: { :ok, pos_integer } | { :error, :full }
+  @spec has_room?(t) :: {:ok, pos_integer} | {:error, :full}
   def has_room?(bucket) do
     index = array_find(bucket, fn (x) -> x == nil end)
 
