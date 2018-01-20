@@ -40,14 +40,14 @@ defmodule Cuckoo do
   ]
 
   @type t :: %Cuckoo{
-    buckets: :array.array(),
-    fingerprint_size: pos_integer,
-    fingerprints_per_bucket: pos_integer,
-    max_num_keys: pos_integer
-  }
+          buckets: :array.array(),
+          fingerprint_size: pos_integer,
+          fingerprints_per_bucket: pos_integer,
+          max_num_keys: pos_integer
+        }
 
   defmodule Error do
-    defexception [reason: nil, action: "", element: nil]
+    defexception reason: nil, action: "", element: nil
 
     def message(exception) do
       "could not #{exception.action} #{exception.element}: #{exception.reason}"
@@ -62,7 +62,7 @@ defmodule Cuckoo do
   be `16` and `4` respectively, as it allows the Cuckoo Filter to achieve a sweet spot
   in space effiency and table occupancy.
   """
-  @spec new(pos_integer, pos_integer, pos_integer) :: Cuckoo.t
+  @spec new(pos_integer, pos_integer, pos_integer) :: Cuckoo.t()
   def new(max_num_keys, fingerprint_size, fingerprints_per_bucket \\ 4) when max_num_keys > 2 do
     num_buckets = upper_power_2(max_num_keys / fingerprints_per_bucket)
     frac = max_num_keys / num_buckets / fingerprints_per_bucket
@@ -90,35 +90,40 @@ defmodule Cuckoo do
   Returns `{:ok, filter}` if successful, otherwise returns `{:error, :full}` from which
   you should consider the Filter to be full.
   """
-  @spec insert(Cuckoo.t, any) :: {:ok, Cuckoo.t} | {:error, :full}
-  def insert(%Cuckoo{
-              buckets: buckets,
-              fingerprint_size: bits_per_item,
-              fingerprints_per_bucket: fingerprints_per_bucket
-  } = filter, element) do
+  @spec insert(Cuckoo.t(), any) :: {:ok, Cuckoo.t()} | {:error, :full}
+  def insert(
+        %Cuckoo{
+          buckets: buckets,
+          fingerprint_size: bits_per_item,
+          fingerprints_per_bucket: fingerprints_per_bucket
+        } = filter,
+        element
+      ) do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
     i2 = alt_index(i1, fingerprint, num_buckets)
 
     i1_bucket = :array.get(i1, buckets)
+
     case Bucket.has_room?(i1_bucket) do
       {:ok, index} ->
-        {:ok, %{filter |
-                buckets: :array.set(i1, Bucket.set(i1_bucket, index, fingerprint), buckets)}}
+        {:ok,
+         %{filter | buckets: :array.set(i1, Bucket.set(i1_bucket, index, fingerprint), buckets)}}
 
       {:error, :full} ->
         i2_bucket = :array.get(i2, buckets)
+
         case Bucket.has_room?(i2_bucket) do
           {:ok, index} ->
-            {:ok, %{filter |
-                    buckets: :array.set(i2, Bucket.set(i2_bucket, index, fingerprint), buckets)}}
+            {:ok,
+             %{
+               filter
+               | buckets: :array.set(i2, Bucket.set(i2_bucket, index, fingerprint), buckets)
+             }}
 
           {:error, :full} ->
-            if :rand.uniform(2) == 1 do
-              kickout(filter, i1, fingerprint, fingerprints_per_bucket)
-            else
-              kickout(filter, i2, fingerprint, fingerprints_per_bucket)
-            end
+            random_i = Enum.random([i1, i2])
+            kickout(filter, random_i, fingerprint, fingerprints_per_bucket)
         end
     end
   end
@@ -128,7 +133,7 @@ defmodule Cuckoo do
 
   Returns `true` if does, otherwise returns `false`.
   """
-  @spec contains?(Cuckoo.t, any) :: boolean
+  @spec contains?(Cuckoo.t(), any) :: boolean
   def contains?(%Cuckoo{buckets: buckets, fingerprint_size: bits_per_item}, element) do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
@@ -139,7 +144,6 @@ defmodule Cuckoo do
       i2 = alt_index(i1, fingerprint, num_buckets)
       Bucket.contains?(:array.get(i2, buckets), fingerprint)
     end
-
   end
 
   @doc """
@@ -148,12 +152,13 @@ defmodule Cuckoo do
   Returns `{:error, :inexistent}` if the element doesn't exist in the filter, otherwise
   returns `{:ok, filter}`.
   """
-  @spec delete(Cuckoo.t, any) :: {:ok, Cuckoo.t} | {:error, :inexistent}
+  @spec delete(Cuckoo.t(), any) :: {:ok, Cuckoo.t()} | {:error, :inexistent}
   def delete(%Cuckoo{buckets: buckets, fingerprint_size: bits_per_item} = filter, element) do
     num_buckets = :array.size(buckets)
     {fingerprint, i1} = fingerprint_and_index(element, num_buckets, bits_per_item)
 
     b1 = :array.get(i1, buckets)
+
     case Bucket.find(b1, fingerprint) do
       {:ok, index} ->
         updated_bucket = Bucket.reset(b1, index)
@@ -177,7 +182,7 @@ defmodule Cuckoo do
   @doc """
   Returns a filter with the inserted element or raises `Cuckoo.Error` if an error occurs.
   """
-  @spec insert!(Cuckoo.t, any) :: Cuckoo.t | no_return
+  @spec insert!(Cuckoo.t(), any) :: Cuckoo.t() | no_return
   def insert!(filter, element) do
     case insert(filter, element) do
       {:ok, filter} ->
@@ -191,7 +196,7 @@ defmodule Cuckoo do
   @doc """
   Returns a filter with the removed element or raises `Cuckoo.Error` if an error occurs.
   """
-  @spec delete!(Cuckoo.t, any) :: Cuckoo.t | no_return
+  @spec delete!(Cuckoo.t(), any) :: Cuckoo.t() | no_return
   def delete!(filter, element) do
     case delete(filter, element) do
       {:ok, filter} ->
@@ -202,13 +207,20 @@ defmodule Cuckoo do
     end
   end
 
-
   # private helper functions
 
-  @spec kickout(Cuckoo.t, non_neg_integer, pos_integer, pos_integer, pos_integer) :: {:ok, Cuckoo.t} | {:error, :full}
+  @spec kickout(Cuckoo.t(), non_neg_integer, pos_integer, pos_integer, pos_integer) ::
+          {:ok, Cuckoo.t()} | {:error, :full}
   defp kickout(filter, index, fingerprint, fingerprints_per_bucket, current_kick \\ @max_kicks)
   defp kickout(_, _, _, _, 0), do: {:error, :full}
-  defp kickout(%Cuckoo{buckets: buckets} = filter, index, fingerprint, fingerprints_per_bucket, current_kick) do
+
+  defp kickout(
+         %Cuckoo{buckets: buckets} = filter,
+         index,
+         fingerprint,
+         fingerprints_per_bucket,
+         current_kick
+       ) do
     bucket = :array.get(index, buckets)
 
     # randomly select an entry from the bucket
@@ -234,9 +246,14 @@ defmodule Cuckoo do
         {:ok, %{filter | buckets: buckets}}
 
       {:error, :full} ->
-        kickout(%{filter | buckets: buckets}, index, fingerprint, fingerprints_per_bucket, current_kick - 1)
+        kickout(
+          %{filter | buckets: buckets},
+          index,
+          fingerprint,
+          fingerprints_per_bucket,
+          current_kick - 1
+        )
     end
-
   end
 
   @spec gen_index(pos_integer, pos_integer) :: non_neg_integer
@@ -246,7 +263,7 @@ defmodule Cuckoo do
 
   @spec fingerprint(pos_integer, pos_integer) :: pos_integer
   defp fingerprint(hash, bits_per_item) do
-    hash &&& ((1 <<< bits_per_item) - 1)
+    hash &&& (1 <<< bits_per_item) - 1
   end
 
   # calculates the smallest power of 2 greater than or equal to n
@@ -272,7 +289,7 @@ defmodule Cuckoo do
   defp fingerprint_and_index(element, num_buckets, bits_per_item) do
     hash = hash1(element)
     fingerprint = fingerprint(hash, bits_per_item)
-    index = gen_index((hash >>> 32), num_buckets)
+    index = gen_index(hash >>> 32, num_buckets)
 
     {fingerprint, index}
   end
@@ -281,5 +298,4 @@ defmodule Cuckoo do
   defp alt_index(i1, fingerprint, num_buckets) do
     i1 ^^^ gen_index(hash2(fingerprint), num_buckets)
   end
-
 end

@@ -33,7 +33,6 @@ defmodule Cuckoo.Bucket do
     :array.reset(index, bucket)
   end
 
-
   @doc """
   Returns the element at the specified `index`.
   """
@@ -41,7 +40,6 @@ defmodule Cuckoo.Bucket do
   def get(bucket, index) do
     :array.get(index, bucket)
   end
-
 
   @doc """
   Checks if the `bucket` has any room left.
@@ -51,7 +49,7 @@ defmodule Cuckoo.Bucket do
   """
   @spec has_room?(t) :: {:ok, pos_integer} | {:error, :full}
   def has_room?(bucket) do
-    index = array_find(bucket, fn (x) -> x == nil end)
+    index = array_find(bucket, fn x -> x == nil end)
 
     if index do
       {:ok, index}
@@ -78,7 +76,7 @@ defmodule Cuckoo.Bucket do
   """
   @spec find(t, pos_integer) :: {:ok, non_neg_integer} | {:error, :inexistent}
   def find(bucket, element) do
-    index = array_find(bucket, fn (x) -> x == element end)
+    index = array_find(bucket, fn x -> x == element end)
 
     if index do
       {:ok, index}
@@ -93,15 +91,17 @@ defmodule Cuckoo.Bucket do
     _array_find(array, size, size, fun)
   end
 
-  @spec _array_find(t, non_neg_integer, non_neg_integer, (any -> boolean)) :: nil | non_neg_integer
+  @spec _array_find(t, non_neg_integer, non_neg_integer, (any -> boolean)) ::
+          nil | non_neg_integer
   defp _array_find(_, _, 0, _), do: nil
+
   defp _array_find(array, size, left, fun) do
     index = size - left
+
     if fun.(:array.get(index, array)) do
       index
     else
       _array_find(array, size, left - 1, fun)
     end
   end
-
 end

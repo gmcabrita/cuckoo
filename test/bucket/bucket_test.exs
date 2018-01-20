@@ -2,7 +2,7 @@ defmodule Cuckoo.BucketTest do
   use ExUnit.Case, async: true
 
   setup do
-    { :ok, bucket: Cuckoo.Bucket.new(4) }
+    {:ok, bucket: Cuckoo.Bucket.new(4)}
   end
 
   test "create new bucket", %{bucket: bucket} do
@@ -10,7 +10,7 @@ defmodule Cuckoo.BucketTest do
   end
 
   test "check if a bucket has room", %{bucket: bucket} do
-    assert Cuckoo.Bucket.has_room?(bucket) == { :ok, 0 }
+    assert Cuckoo.Bucket.has_room?(bucket) == {:ok, 0}
   end
 
   test "check if a bucket contains an element after inserting", %{bucket: bucket} do

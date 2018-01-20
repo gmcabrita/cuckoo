@@ -21,8 +21,8 @@ defmodule CuckooTest do
 
   test "sucessful insert!/2" do
     assert Cuckoo.new(4, 16)
-    |> Cuckoo.insert!("hello")
-    |> Cuckoo.contains?("hello")
+           |> Cuckoo.insert!("hello")
+           |> Cuckoo.contains?("hello")
   end
 
   test "unsucessful insert!/2" do
@@ -40,7 +40,8 @@ defmodule CuckooTest do
   end
 
   test "successful delete!/2" do
-    refute Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello") |> Cuckoo.contains?("hello")
+    refute Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello")
+           |> Cuckoo.contains?("hello")
   end
 
   test "unsucessful delete!/2" do
@@ -51,32 +52,31 @@ defmodule CuckooTest do
   end
 
   test "occupancy, false positives and removal" do
-    total_inserts = 100000
+    total_inserts = 100_000
     cf = Cuckoo.new(total_inserts, 16, 4)
-    {cf, inserts} = Enum.reduce(
-      1..total_inserts,
-      {cf, 0},
-      fn (x, {acc, inserts}) ->
+
+    {cf, inserts} =
+      Enum.reduce(1..total_inserts, {cf, 0}, fn x, {acc, inserts} ->
         case Cuckoo.insert(acc, x) do
           {:ok, cf} -> {cf, inserts + 1}
           {:err, :full} -> assert false
         end
-      end
-    )
+      end)
 
     assert inserts == total_inserts
 
     {insert_count, false_count} =
-    Enum.reduce(
-      1..total_inserts,
-      {0, 0}, # {inserts, false_queries}
-      fn(x, {i, f}) ->
-        insert = Cuckoo.contains?(cf, x)
-        query = Cuckoo.contains?(cf, x + total_inserts)
+      Enum.reduce(
+        1..total_inserts,
+        # {inserts, false_queries}
+        {0, 0},
+        fn x, {i, f} ->
+          insert = Cuckoo.contains?(cf, x)
+          query = Cuckoo.contains?(cf, x + total_inserts)
 
-        {if(insert, do: i + 1, else: i), if(query, do: f + 1, else: f)}
-      end
-    )
+          {if(insert, do: i + 1, else: i), if(query, do: f + 1, else: f)}
+        end
+      )
 
     assert insert_count == total_inserts
 
@@ -86,24 +86,19 @@ defmodule CuckooTest do
     assert false_positive_rate <= 0.015
 
     total_removes = div(total_inserts, 2)
-    {cf, removal_count} = Enum.reduce(
-      1..total_removes,
-      {cf, 0},
-      fn (x, {acc, removes}) ->
+
+    {cf, removal_count} =
+      Enum.reduce(1..total_removes, {cf, 0}, fn x, {acc, removes} ->
         case Cuckoo.delete(acc, x) do
           {:ok, cf} -> {cf, removes + 1}
           {:err, :inexistent} -> assert false
         end
-      end
-    )
+      end)
 
     assert removal_count == total_removes
 
     false_removal_count =
-    Enum.reduce(
-      1..total_removes,
-      0,
-      fn(x, i) ->
+      Enum.reduce(1..total_removes, 0, fn x, i ->
         query = Cuckoo.contains?(cf, x)
 
         if query do
@@ -111,8 +106,7 @@ defmodule CuckooTest do
         else
           i
         end
-      end
-    )
+      end)
 
     false_removal_rate = 100.0 * false_removal_count / total_removes
     assert false_removal_rate <= 0.01
