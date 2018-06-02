@@ -40,7 +40,9 @@ defmodule CuckooTest do
   end
 
   test "successful delete!/2" do
-    refute Cuckoo.new(3, 16) |> Cuckoo.insert!("hello") |> Cuckoo.delete!("hello")
+    refute Cuckoo.new(3, 16)
+           |> Cuckoo.insert!("hello")
+           |> Cuckoo.delete!("hello")
            |> Cuckoo.contains?("hello")
   end
 
