@@ -1,8 +1,7 @@
 Cuckoo
 ======
 
-[![Build Status](https://img.shields.io/travis/gmcabrita/cuckoo.svg?style=flat)](https://travis-ci.org/gmcabrita/cuckoo)
-[![Coverage Status](https://img.shields.io/coveralls/gmcabrita/cuckoo.svg?style=flat)](https://coveralls.io/r/gmcabrita/cuckoo?branch=master)
+[![Build Status](https://img.shields.io/circleci/project/github/gmcabrita/cuckoo/master.svg?style=flat)](https://circleci.com/gh/gmcabrita/cuckoo)
 [![Hex docs](http://img.shields.io/badge/hex.pm-docs-green.svg?style=flat)](https://hexdocs.pm/cuckoo)
 [![Hex Version](http://img.shields.io/hexpm/v/cuckoo.svg?style=flat)](https://hex.pm/packages/cuckoo)
 [![License](http://img.shields.io/hexpm/l/cuckoo.svg?style=flat)](https://github.com/gmcabrita/cuckoo/blob/master/LICENSE)
