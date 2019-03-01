@@ -48,7 +48,7 @@ defmodule Cuckoo.Mixfile do
   defp deps() do
     [
       {:murmur, "~> 1.0"},
-      {:excoveralls, "~> 0.8", only: :docs, runtime: false},
+      {:excoveralls, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: [:dev, :docs], runtime: false},
       {:dialyzex, "~> 1.2.0", only: [:dev, :test], runtime: false}
     ]
