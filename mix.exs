@@ -19,6 +19,10 @@ defmodule Cuckoo.Mixfile do
       description: @description,
       package: package(),
       deps: deps(),
+      aliases: aliases(),
+      preferred_cli_env: [
+        ci: :test
+      ],
       test_coverage: [tool: ExCoveralls],
       docs: docs(),
       dialyzer_ignored_warnings: [
@@ -54,6 +58,18 @@ defmodule Cuckoo.Mixfile do
       maintainers: ["Gonçalo Cabrita"],
       licenses: ["MIT"],
       links: %{"GitHub" => @github}
+    ]
+  end
+
+  defp aliases do
+    [
+      ci: [
+        "format --check-formatted",
+        "xref deprecated",
+        "xref unreachable",
+        "test",
+        "dialyzer"
+      ]
     ]
   end
 end
