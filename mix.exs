@@ -48,7 +48,7 @@ defmodule Cuckoo.Mixfile do
       {:murmur, "~> 1.0"},
       {:excoveralls, "~> 0.10", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.16", only: [:dev, :docs], runtime: false},
-      {:dialyzex, "~> 1.2.0", only: [:dev, :test], runtime: false}
+      {:dialyzex, "~> 1.3.0", only: [:dev, :test], runtime: false}
     ]
   end
 
